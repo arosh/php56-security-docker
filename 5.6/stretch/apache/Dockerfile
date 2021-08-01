@@ -125,7 +125,7 @@ RUN set -xe; \
 	wget -O php.zip "$PHP_URL"; \
 	wget -O bison.tar.xz "$BISON_URL"; \
 	\
-	unzip php.zip; \
+	unzip -q php.zip; \
 	mv php-src-${PHP_COMMIT} php-${PHP_VERSION}; \
 	rm php.zip; \
 	tar Jcf php.tar.xz -C . php-${PHP_VERSION}; \
