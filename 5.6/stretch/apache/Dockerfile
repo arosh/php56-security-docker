@@ -105,8 +105,8 @@ ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
 ENV PHP_VERSION 5.6.40
-ENV PHP_COMMIT 4c48e69bc73ac17baee9508ede77227114461f05
-ENV PHP_URL="https://github.com/microsoft/php-src/archive/${PHP_COMMIT}.zip"
+ENV PHP_COMMIT b61062df2ced908302337a8dce68af6f920f68b1
+ENV PHP_URL="https://github.com/remicollet/php-src-security/archive/${PHP_COMMIT}.zip"
 ENV BISON_URL="http://ftp.gnu.org/gnu/bison/bison-2.7.1.tar.xz"
 
 RUN set -xe; \
@@ -126,7 +126,7 @@ RUN set -xe; \
 	wget -O bison.tar.xz "$BISON_URL"; \
 	\
 	unzip -q php.zip; \
-	mv php-src-${PHP_COMMIT} php-${PHP_VERSION}; \
+	mv php-src-security-${PHP_COMMIT} php-${PHP_VERSION}; \
 	rm php.zip; \
 	tar Jcf php.tar.xz -C . php-${PHP_VERSION}; \
 	rm -r php-${PHP_VERSION}; \
