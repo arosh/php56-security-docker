@@ -105,7 +105,7 @@ ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
 ENV PHP_VERSION 5.6.40
-ENV PHP_COMMIT b7b58155aaa018d11f30c6de9df4ccfe949e60a3
+ENV PHP_COMMIT 9d829bb22f746808c809c55d9f975130b34e20c9
 ENV PHP_URL="https://github.com/remicollet/php-src-security/archive/${PHP_COMMIT}.zip"
 ENV BISON_URL="http://ftp.gnu.org/gnu/bison/bison-2.7.1.tar.xz"
 
