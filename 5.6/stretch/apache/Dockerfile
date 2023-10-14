@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:10-slim
 
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
@@ -105,7 +105,7 @@ ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
 ENV PHP_VERSION 5.6.40
-ENV PHP_COMMIT 503d0f04e34d76717c6eb6502b89d320fd91bb3a
+ENV PHP_COMMIT 488ae97660c258c4120e2e7ab6404b8361b56a41
 ENV PHP_URL="https://github.com/remicollet/php-src-security/archive/${PHP_COMMIT}.zip"
 ENV BISON_URL="http://ftp.gnu.org/gnu/bison/bison-2.7.1.tar.xz"
 
@@ -133,11 +133,14 @@ RUN set -xe; \
 	\
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps
 
+COPY bison.patch /usr/src/
+
 RUN set -xe; \
 	cd /usr/src; \
 	mkdir bison; \
 	tar -xf bison.tar.xz -C bison --strip-components=1; \
 	cd bison; \
+	patch -u lib/fseterr.c < /usr/src/bison.patch; \
 	./configure; \
 	make -j "$(nproc)"; \
 	make install; \
@@ -154,7 +157,7 @@ RUN set -eux; \
 		libcurl4-openssl-dev \
 		libedit-dev \
 		libsqlite3-dev \
-		libssl1.0-dev \
+		libssl-dev \
 		libxml2-dev \
 		zlib1g-dev \
 		${PHP_EXTRA_BUILD_DEPS:-} \
