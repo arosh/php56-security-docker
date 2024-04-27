@@ -1,4 +1,4 @@
-FROM debian:10-slim
+FROM debian:11-slim
 
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
@@ -105,7 +105,7 @@ ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
 ENV PHP_VERSION 5.6.40
-ENV PHP_COMMIT 488ae97660c258c4120e2e7ab6404b8361b56a41
+ENV PHP_COMMIT d6837c8fc4caff97716c56d6540aea0e8790a5f6
 ENV PHP_URL="https://github.com/remicollet/php-src-security/archive/${PHP_COMMIT}.zip"
 ENV BISON_URL="http://ftp.gnu.org/gnu/bison/bison-2.7.1.tar.xz"
 
