@@ -1,4 +1,25 @@
-FROM debian:11-slim
+# syntax=docker/dockerfile:1
+
+# sources are fetched in their own stage; only the php.tar.xz archive is copied into the final image
+FROM debian/eol:bullseye-slim AS php-src
+
+ENV PHP_VERSION 5.6.40
+ENV PHP_COMMIT 5c2cc46b45cf286666671df14edf25fc23676cd8
+ENV PHP_URL https://github.com/remicollet/php-src-security.git
+ENV BISON_URL http://ftp.gnu.org/gnu/bison/bison-2.7.1.tar.xz
+ENV BISON_SHA256 b409adcbf245baadb68d2f66accf6fdca5e282cafec1b865f4b5e963ba8ea7fb
+
+ADD ${PHP_URL}#${PHP_COMMIT} /usr/src/php-${PHP_VERSION}/
+ADD --checksum=sha256:${BISON_SHA256} ${BISON_URL} /usr/src/bison.tar.xz
+
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends xz-utils; \
+	rm -rf /var/lib/apt/lists/*; \
+	cd /usr/src; \
+	tar Jcf php.tar.xz php-${PHP_VERSION}
+
+FROM debian/eol:bullseye-slim
 
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
@@ -105,33 +126,9 @@ ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
 ENV PHP_VERSION 5.6.40
-ENV PHP_COMMIT d6837c8fc4caff97716c56d6540aea0e8790a5f6
-ENV PHP_URL="https://github.com/remicollet/php-src-security/archive/${PHP_COMMIT}.zip"
-ENV BISON_URL="http://ftp.gnu.org/gnu/bison/bison-2.7.1.tar.xz"
+ENV PHP_COMMIT 5c2cc46b45cf286666671df14edf25fc23676cd8
 
-RUN set -xe; \
-	\
-	fetchDeps=' \
-		wget \
-		unzip \
-	'; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends $fetchDeps; \
-	rm -rf /var/lib/apt/lists/*; \
-	\
-	mkdir -p /usr/src; \
-	cd /usr/src; \
-	\
-	wget -O php.zip "$PHP_URL"; \
-	wget -O bison.tar.xz "$BISON_URL"; \
-	\
-	unzip -q php.zip; \
-	mv php-src-security-${PHP_COMMIT} php-${PHP_VERSION}; \
-	rm php.zip; \
-	tar Jcf php.tar.xz -C . php-${PHP_VERSION}; \
-	rm -r php-${PHP_VERSION}; \
-	\
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps
+COPY --from=php-src /usr/src/php.tar.xz /usr/src/bison.tar.xz /usr/src/
 
 COPY bison.patch /usr/src/
 
@@ -149,7 +146,8 @@ RUN set -xe; \
 
 COPY docker-php-source /usr/local/bin/
 
-RUN set -eux; \
+RUN --mount=type=bind,from=php-src,source=/usr/src/php-${PHP_VERSION},target=/usr/src/php-src \
+	set -eux; \
 	\
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
@@ -169,7 +167,7 @@ RUN set -eux; \
 		CPPFLAGS="$PHP_CPPFLAGS" \
 		LDFLAGS="$PHP_LDFLAGS" \
 	; \
-	docker-php-source extract; \
+	cp -a /usr/src/php-src /usr/src/php; \
 	cd /usr/src/php; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	debMultiarch="$(dpkg-architecture --query DEB_BUILD_MULTIARCH)"; \
